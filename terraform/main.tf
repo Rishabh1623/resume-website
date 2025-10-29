@@ -62,10 +62,6 @@ locals {
   visits_table_arn  = var.use_existing_resources ? data.aws_dynamodb_table.existing_visits[0].arn : aws_dynamodb_table.visits[0].arn
   
   lambda_runtime = "nodejs20.x"  # Using LTS version
-  common_lambda_env = {
-    AWS_REGION = var.aws_region
-    ENVIRONMENT = "production"
-  }
 }
 
 # ============================================
@@ -270,11 +266,11 @@ resource "aws_lambda_function" "contact_handler" {
   source_code_hash = filebase64sha256("${path.module}/../contact-handler.zip")
   
   environment {
-    variables = merge(local.common_lambda_env, {
+    variables = {
       TABLE_NAME = var.use_existing_resources ? data.aws_dynamodb_table.existing_contact[0].name : aws_dynamodb_table.contact_messages[0].name
       TO_EMAIL   = var.contact_email
       SES_FROM   = "no-reply@${var.domain_name}"
-    })
+    }
   }
 }
 
@@ -291,9 +287,9 @@ resource "aws_lambda_function" "visit_handler" {
   source_code_hash = filebase64sha256("${path.module}/../visit-handler.zip")
   
   environment {
-    variables = merge(local.common_lambda_env, {
+    variables = {
       TABLE_NAME = var.use_existing_resources ? data.aws_dynamodb_table.existing_visits[0].name : aws_dynamodb_table.visits[0].name
-    })
+    }
   }
 }
 
@@ -309,10 +305,10 @@ resource "aws_lambda_function" "chatbot_handler" {
   source_code_hash = filebase64sha256("${path.module}/../chatbot-handler.zip")
   
   environment {
-    variables = merge(local.common_lambda_env, {
+    variables = {
       CONVERSATION_TABLE = aws_dynamodb_table.conversations.name
       ALLOWED_ORIGIN     = "https://${var.domain_name}"
-    })
+    }
   }
 }
 

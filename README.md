@@ -1,102 +1,105 @@
-# 🌐 Serverless Resume Website on AWS – Rishabh Ravi Madne
+# Resume Website with AWS Serverless Architecture
 
-This repository hosts my personal resume as a **serverless, production-grade website** built on AWS infrastructure.  
-It demonstrates real-world implementation of core AWS services with best practices in cost, performance, and security.
+A modern, cost-optimized serverless resume website built with AWS services and automated CI/CD pipeline.
 
-🔗 Live Demo (Coming Soon): https://resume.rishabhmadne.com
+## 🏗️ Architecture
+- **Frontend**: Static website hosted on S3
+- **Backend**: Lambda functions with API Gateway
+- **Database**: DynamoDB for contact messages and visit tracking
+- **AI Chatbot**: Bedrock-powered assistant using Claude 3 Haiku
+- **CI/CD**: GitHub Actions for automated deployment
 
----
+## 🚀 Features
+- Responsive resume website
+- Contact form with email notifications
+- Visit counter tracking
+- AI-powered chatbot assistant
+- Cost-optimized serverless architecture (~$5-7/month)
+- Automated deployment pipeline
 
-## 🚀 Why Host a Resume on AWS?
+## 📋 Prerequisites
+- AWS Account with Bedrock access
+- GitHub Account
+- Domain name (optional)
 
-> "Show, don’t just tell" – this project turns my resume into a **living technical portfolio**.
+## 🛠️ Quick Setup
 
-- ✅ Demonstrates practical AWS experience
-- ✅ Great conversation starter in interviews
-- ✅ Highlights cost-optimization, IaC, and serverless patterns
-- ✅ Easy to scale and update
+### 1. Clone Repository
+```bash
+git clone https://github.com/yourusername/resume-website.git
+cd resume-website
+```
 
----
+### 2. Configure AWS Credentials
+Add these secrets to your GitHub repository:
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
 
-## 🧱 Architecture Overview
+### 3. Update Configuration
+Update `terraform/terraform.tfvars`:
+```hcl
+domain_name = "yourdomain.com"
+contact_email = "your-email@example.com"
+aws_region = "us-east-1"
+```
 
-This is a **fully serverless architecture** designed with performance and security in mind.
+### 4. Deploy Infrastructure
+```bash
+cd terraform
+terraform init
+terraform apply
+```
 
-### 📦 Core Components
+### 5. Deploy Website
+```bash
+./deploy.sh
+```
 
-| AWS Service       | Role |
-|------------------|------|
-| **Amazon S3**     | Hosts static files (HTML/CSS) |
-| **Amazon CloudFront** | Global CDN for fast content delivery |
-| **Route 53**      | Custom domain & DNS management |
-| **Certificate Manager** | HTTPS with free SSL |
-| **Lambda + API Gateway** | Handles dynamic features (e.g. visitor counter, contact form) |
-| **DynamoDB**      | Stores contact form data / visit analytics |
+## 🤖 AI Chatbot
+The website includes an intelligent chatbot powered by Amazon Bedrock (Claude 3 Haiku) that can:
+- Answer questions about experience and skills
+- Schedule meetings via email
+- Download resume
+- Navigate to different sections
 
-cloud_resume_site/
-│
-├── index.html # Main resume page
-├── projects.html # Dedicated project portfolio
-├── style.css # Stylesheet for both pages
-├── README.md # You're reading this
+## 💰 Cost Estimation (Monthly)
+- **Bedrock (Claude 3 Haiku)**: ~$1-3
+- **Lambda**: ~$0.50
+- **DynamoDB**: ~$0.50
+- **API Gateway**: ~$3.50
+- **S3**: ~$1-2
+- **Total**: ~$5-7/month
 
+## 🔧 Local Development
+```bash
+# Test Lambda functions locally
+cd lambda
+npm test
 
----
+# Preview website
+cd website
+python -m http.server 8000
+```
 
-## 🧠 Features
+## 📊 Monitoring
+- CloudWatch logs for Lambda functions
+- DynamoDB metrics in AWS Console
+- API Gateway metrics and logs
 
-- ✅ Mobile-responsive HTML + CSS design
-- ✅ AWS Bedrock, Lambda, DynamoDB–ready backend hooks
-- ✅ Global content delivery with CloudFront
-- ✅ CI/CD-ready (via GitHub Actions)
-- ✅ Infrastructure-as-Code ready (Terraform/CloudFormation)
+## 🔄 CI/CD Pipeline
+Automated deployment on push to main branch:
+1. Update Lambda functions
+2. Deploy website to S3
+3. Test API endpoints
+4. Notify on completion
 
----
+## 🤝 Contributing
+1. Fork the repository
+2. Create feature branch
+3. Make changes
+4. Submit pull request
 
-## 🛠️ How to Deploy (Manual Steps)
-
-1. **Create an S3 bucket** and enable static website hosting.
-2. **Upload files:** `index.html`, `projects.html`, `style.css`.
-3. **Set up CloudFront** with:
-   - Origin Access Control (OAC) to S3
-   - HTTPS via AWS Certificate Manager
-4. **Configure Route 53** to point `resume.yourdomain.com` to CloudFront.
-5. (Optional) **Add Lambda + API Gateway** for dynamic features.
-6. (Optional) **Add CI/CD pipeline** using GitHub Actions.
-
----
-
-## 📝 Future Enhancements
-
-- [ ] Contact form with API Gateway + Lambda + DynamoDB
-- [ ] Visitor analytics tracker using CloudWatch or DynamoDB
-- [ ] CI/CD pipeline to auto-deploy from GitHub
-- [ ] Terraform IaC templates for full stack provisioning
-
----
-
-## 📚 Featured Projects
-
-| Project | Description |
-|--------|-------------|
-| [GenAI-Powered Medical Coding](https://www.linkedin.com/pulse/automating-medical-coding-genai-aws-real-world-healthtech-madne-laq1f/) | Used Bedrock, Lambda & DynamoDB to automate ICD-10 tagging |
-| [Serverless Food Delivery Platform](https://www.linkedin.com/pulse/how-i-built-scalable-serverless-food-delivery-platform-rishabh-madne-04unf/) | Built with Lambda, API Gateway, DynamoDB, GitHub Actions |
-| [SpendWise AWS Cost Dashboard](https://www.linkedin.com/pulse/spendwise-building-custom-aws-cost-optimization-dashboard-madne-szx6f/) | Custom AWS cost optimization insights with S3, Athena, Quicksight |
-| [Scalable WordPress on AWS](https://www.linkedin.com/pulse/how-i-built-scalable-wordpress-blog-aws-without-single-rishabh-madne-7qtaf/) | Multi-AZ deployment using EC2, RDS, EFS, CloudFront |
-
----
-
-## 🙋‍♂️ About Me
-
-**Rishabh Ravi Madne**  
-AWS Solutions Architect | Terraform | Kubernetes | Cloud-Native Systems  
-📍 Jersey City, NJ  
-📧 rishabhmadne16@outlook.com  
-🔗 [LinkedIn](https://www.linkedin.com/in/rishabhmadne) | [GitHub](https://github.com/Rishabh1623)
-
----
-
----
-
-## 🗂️ Project Structure
-
+## 📚 Documentation
+- [Deployment Guide](docs/DEPLOYMENT.md)
+- [API Documentation](docs/API.md)
+- [Chatbot Configuration](docs/CHATBOT.md)

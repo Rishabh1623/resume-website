@@ -69,6 +69,19 @@ Unlike typical static portfolios, this website features an **intelligent AI assi
 
 ---
 
+## 🛡️ Safe Deployment - Your Existing Resources Are Protected!
+
+**IMPORTANT**: This deployment is designed to **ADD the chatbot** to your existing infrastructure **WITHOUT recreating or modifying** your current resources.
+
+- ✅ **Existing S3, Lambda, DynamoDB, API Gateway** → REUSED (not touched)
+- 🆕 **New chatbot resources** → CREATED (4 new resources)
+- ⚠️ **IAM permissions** → UPDATED (additive only)
+- ❌ **Nothing deleted** → ZERO data loss
+
+**See**: [DEPLOYMENT-SAFETY.md](DEPLOYMENT-SAFETY.md) for complete safety details
+
+---
+
 ## 🚀 Quick Deploy (30 minutes)
 
 ### Prerequisites

@@ -1,24 +1,35 @@
+# Optimized Outputs
+
 output "website_url" {
   description = "Website URL"
-  value       = "https://${aws_s3_bucket.website.bucket}"
+  value       = "https://${var.domain_name}"
 }
 
 output "api_gateway_url" {
-  description = "API Gateway URL"
-  value       = "https://${aws_api_gateway_rest_api.resume_api.id}.execute-api.${var.aws_region}.amazonaws.com/prod"
-}
-
-output "contact_endpoint" {
-  description = "Contact form endpoint"
-  value       = "https://${aws_api_gateway_rest_api.resume_api.id}.execute-api.${var.aws_region}.amazonaws.com/prod/contact"
-}
-
-output "visit_endpoint" {
-  description = "Visit counter endpoint"
-  value       = "https://${aws_api_gateway_rest_api.resume_api.id}.execute-api.${var.aws_region}.amazonaws.com/prod/visit"
+  description = "API Gateway base URL"
+  value       = "https://${local.api_id}.execute-api.${data.aws_region.current.name}.amazonaws.com/prod"
 }
 
 output "chatbot_endpoint" {
-  description = "Chatbot endpoint"
-  value       = "https://${aws_api_gateway_rest_api.resume_api.id}.execute-api.${var.aws_region}.amazonaws.com/prod/chatbot"
+  description = "Chatbot API endpoint"
+  value       = "https://${local.api_id}.execute-api.${data.aws_region.current.name}.amazonaws.com/prod/chatbot"
+}
+
+output "api_gateway_id" {
+  description = "API Gateway ID"
+  value       = local.api_id
+}
+
+output "lambda_functions" {
+  description = "Lambda function names"
+  value = {
+    chatbot = aws_lambda_function.chatbot_handler.function_name
+  }
+}
+
+output "dynamodb_tables" {
+  description = "DynamoDB table names"
+  value = {
+    conversations = aws_dynamodb_table.conversations.name
+  }
 }

@@ -1,56 +1,63 @@
-import { DynamoDBClient, UpdateItemCommand, GetItemCommand } from '@aws-sdk/client-dynamodb';
+// Optimized Visit Handler - AWS Best Practices
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, UpdateCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
 
-const dynamodb = new DynamoDBClient({ region: process.env.AWS_REGION });
+const ddbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
+const docClient = DynamoDBDocumentClient.from(ddbClient);
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "POST,GET,OPTIONS",
+  "Content-Type": "application/json"
+};
 
 export const handler = async (event) => {
-    const headers = {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-        "Content-Type": "application/json"
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers: CORS_HEADERS, body: '' };
+  }
+
+  try {
+    const path = '/';  // Single counter for entire site
+    const timestamp = new Date().toISOString();
+
+    // Atomic increment
+    await docClient.send(new UpdateCommand({
+      TableName: process.env.TABLE_NAME,
+      Key: { path },
+      UpdateExpression: 'ADD visitCount :inc SET lastVisit = :timestamp',
+      ExpressionAttributeValues: {
+        ':inc': 1,
+        ':timestamp': timestamp
+      }
+    }));
+
+    // Get updated count
+    const result = await docClient.send(new GetCommand({
+      TableName: process.env.TABLE_NAME,
+      Key: { path }
+    }));
+
+    const visitCount = result.Item?.visitCount || 1;
+
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ 
+        visitCount,
+        timestamp
+      })
     };
 
-    if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 200, headers, body: '' };
-    }
-
-    try {
-        const path = event.path || '/';
-
-        // Update visit count
-        await dynamodb.send(new UpdateItemCommand({
-            TableName: process.env.TABLE_NAME,
-            Key: { path: { S: path } },
-            UpdateExpression: 'ADD visitCount :inc SET lastVisit = :timestamp',
-            ExpressionAttributeValues: {
-                ':inc': { N: '1' },
-                ':timestamp': { S: new Date().toISOString() }
-            }
-        }));
-
-        // Get current count
-        const result = await dynamodb.send(new GetItemCommand({
-            TableName: process.env.TABLE_NAME,
-            Key: { path: { S: path } }
-        }));
-
-        const visitCount = result.Item?.visitCount?.N || '1';
-
-        return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({ 
-                visitCount: parseInt(visitCount),
-                timestamp: new Date().toISOString()
-            })
-        };
-
-    } catch (error) {
-        console.error('Visit counter error:', error);
-        return {
-            statusCode: 500,
-            headers,
-            body: JSON.stringify({ error: 'Failed to update visit count' })
-        };
-    }
+  } catch (error) {
+    console.error('Visit counter error:', error);
+    return {
+      statusCode: 500,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ 
+        visitCount: 0,
+        error: 'Failed to update visit count'
+      })
+    };
+  }
 };

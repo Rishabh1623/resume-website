@@ -1,5 +1,5 @@
-# Optimized Terraform Configuration for Resume Website
-# Following AWS and Terraform Best Practices
+# Resume Website - Optimized Terraform Configuration
+# Simple deployment: terraform init -> terraform plan -> terraform apply
 
 terraform {
   required_version = ">= 1.0"

@@ -55,13 +55,13 @@ data "aws_api_gateway_rest_api" "existing_api" {
 # ============================================
 
 locals {
-  api_id = var.use_existing_resources ? data.aws_api_gateway_rest_api.existing_api[0].id : aws_api_gateway_rest_api.main[0].id
+  api_id      = var.use_existing_resources ? data.aws_api_gateway_rest_api.existing_api[0].id : aws_api_gateway_rest_api.main[0].id
   api_root_id = var.use_existing_resources ? data.aws_api_gateway_rest_api.existing_api[0].root_resource_id : aws_api_gateway_rest_api.main[0].root_resource_id
-  
+
   contact_table_arn = var.use_existing_resources ? data.aws_dynamodb_table.existing_contact[0].arn : aws_dynamodb_table.contact_messages[0].arn
   visits_table_arn  = var.use_existing_resources ? data.aws_dynamodb_table.existing_visits[0].arn : aws_dynamodb_table.visits[0].arn
-  
-  lambda_runtime = "nodejs20.x"  # Using LTS version
+
+  lambda_runtime = "nodejs20.x" # Using LTS version
 }
 
 # ============================================
@@ -76,11 +76,11 @@ resource "aws_s3_bucket" "website" {
 resource "aws_s3_bucket_website_configuration" "website" {
   count  = var.use_existing_resources ? 0 : 1
   bucket = aws_s3_bucket.website[0].id
-  
+
   index_document {
     suffix = "index.html"
   }
-  
+
   error_document {
     key = "index.html"
   }
@@ -89,7 +89,7 @@ resource "aws_s3_bucket_website_configuration" "website" {
 resource "aws_s3_bucket_public_access_block" "website" {
   count  = var.use_existing_resources ? 0 : 1
   bucket = aws_s3_bucket.website[0].id
-  
+
   block_public_acls       = false
   block_public_policy     = false
   ignore_public_acls      = false
@@ -99,7 +99,7 @@ resource "aws_s3_bucket_public_access_block" "website" {
 resource "aws_s3_bucket_policy" "website" {
   count  = var.use_existing_resources ? 0 : 1
   bucket = aws_s3_bucket.website[0].id
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -121,16 +121,16 @@ resource "aws_dynamodb_table" "contact_messages" {
   name         = "contact-messages"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
-  
+
   attribute {
     name = "id"
     type = "S"
   }
-  
+
   point_in_time_recovery {
     enabled = true
   }
-  
+
   server_side_encryption {
     enabled = true
   }
@@ -141,16 +141,16 @@ resource "aws_dynamodb_table" "visits" {
   name         = "visits"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "path"
-  
+
   attribute {
     name = "path"
     type = "S"
   }
-  
+
   point_in_time_recovery {
     enabled = true
   }
-  
+
   server_side_encryption {
     enabled = true
   }
@@ -160,21 +160,21 @@ resource "aws_dynamodb_table" "conversations" {
   name         = "chatbot-conversations"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "sessionId"
-  
+
   attribute {
     name = "sessionId"
     type = "S"
   }
-  
+
   ttl {
     attribute_name = "ttl"
     enabled        = true
   }
-  
+
   point_in_time_recovery {
     enabled = true
   }
-  
+
   server_side_encryption {
     enabled = true
   }
@@ -186,7 +186,7 @@ resource "aws_dynamodb_table" "conversations" {
 
 resource "aws_iam_role" "lambda" {
   name = "resume-lambda-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -207,7 +207,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
 resource "aws_iam_role_policy" "lambda_custom" {
   name = "resume-lambda-custom-policy"
   role = aws_iam_role.lambda.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -240,9 +240,9 @@ resource "aws_iam_role_policy" "lambda_custom" {
         }
       },
       {
-        Sid    = "BedrockAccess"
-        Effect = "Allow"
-        Action = "bedrock:InvokeModel"
+        Sid      = "BedrockAccess"
+        Effect   = "Allow"
+        Action   = "bedrock:InvokeModel"
         Resource = "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
       }
     ]
@@ -262,9 +262,9 @@ resource "aws_lambda_function" "contact_handler" {
   runtime       = local.lambda_runtime
   timeout       = 10
   memory_size   = 128
-  
+
   source_code_hash = filebase64sha256("${path.module}/../contact-handler.zip")
-  
+
   environment {
     variables = {
       TABLE_NAME = var.use_existing_resources ? data.aws_dynamodb_table.existing_contact[0].name : aws_dynamodb_table.contact_messages[0].name
@@ -283,9 +283,9 @@ resource "aws_lambda_function" "visit_handler" {
   runtime       = local.lambda_runtime
   timeout       = 5
   memory_size   = 128
-  
+
   source_code_hash = filebase64sha256("${path.module}/../visit-handler.zip")
-  
+
   environment {
     variables = {
       TABLE_NAME = var.use_existing_resources ? data.aws_dynamodb_table.existing_visits[0].name : aws_dynamodb_table.visits[0].name
@@ -301,9 +301,9 @@ resource "aws_lambda_function" "chatbot_handler" {
   runtime       = local.lambda_runtime
   timeout       = 15
   memory_size   = 256
-  
+
   source_code_hash = filebase64sha256("${path.module}/../chatbot-handler.zip")
-  
+
   environment {
     variables = {
       CONVERSATION_TABLE = aws_dynamodb_table.conversations.name
@@ -319,7 +319,7 @@ resource "aws_lambda_function" "chatbot_handler" {
 resource "aws_api_gateway_rest_api" "main" {
   count = var.use_existing_resources ? 0 : 1
   name  = "resume-api"
-  
+
   endpoint_configuration {
     types = ["REGIONAL"]
   }
@@ -362,27 +362,15 @@ resource "aws_api_gateway_stage" "prod" {
   deployment_id = aws_api_gateway_deployment.main.id
   rest_api_id   = local.api_id
   stage_name    = "prod"
+
+  xray_tracing_enabled = false
   
-  xray_tracing_enabled = true
-  
-  access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.api_gateway.arn
-    format = jsonencode({
-      requestId      = "$context.requestId"
-      ip             = "$context.identity.sourceIp"
-      requestTime    = "$context.requestTime"
-      httpMethod     = "$context.httpMethod"
-      resourcePath   = "$context.resourcePath"
-      status         = "$context.status"
-      protocol       = "$context.protocol"
-      responseLength = "$context.responseLength"
-    })
-  }
+  # CloudWatch logging disabled to avoid role ARN requirement
 }
 
 resource "aws_api_gateway_deployment" "main" {
   rest_api_id = local.api_id
-  
+
   triggers = {
     redeployment = sha1(jsonencode([
       aws_api_gateway_resource.chatbot.id,
@@ -390,11 +378,11 @@ resource "aws_api_gateway_deployment" "main" {
       aws_api_gateway_integration.chatbot_post.id,
     ]))
   }
-  
+
   lifecycle {
     create_before_destroy = true
   }
-  
+
   depends_on = [
     aws_api_gateway_integration.chatbot_post
   ]
